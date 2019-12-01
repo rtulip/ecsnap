@@ -1,19 +1,23 @@
 use crate::{
     Component,
     Entity,
+    GenericStorage,
 };
-pub struct World {
+use std::any::{Any, TypeId};
+use std::collections::HashMap;
 
+pub struct World {
+    pub components: HashMap<TypeId, Box<dyn Any>>,
 }
 
 impl World {
 
-    pub fn register_component_with_storage<C: Component>(&mut self) {}
+    pub fn register_component<C: Component>(&mut self) {
+        self.components.insert(TypeId::of::<C>(), Box::new(C::Storage::new()));
+    }
     
-    // pub fn add_component_to_storage<C: Component>(&mut self, component: C) -> usize {}
+    // pub fn add_component_instance<C: Component>(&mut self, component: C) -> usize {}
     
-    // pub fn get_component<C: Component>(&self, index: usize) -> &C {}
-
     // pub fn create_entity(&mut self) -> Entity {}
     
     pub fn add_component_to_entity<C: Component>(&mut self, entity: Entity, component: C) {}
