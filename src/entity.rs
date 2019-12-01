@@ -1,1 +1,4 @@
-pub struct Entity(usize);
+#[derive(Clone, Copy)]
+pub struct Entity{
+    pub id: usize
+}

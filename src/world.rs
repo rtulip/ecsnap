@@ -9,6 +9,8 @@ use std::collections::HashMap;
 #[derive(Default)]
 pub struct World {
     pub components: HashMap<TypeId, Box<dyn Any>>,
+    pub entities: Vec<Entity>,
+    next_entity_id: usize,
 }
 
 impl World {
@@ -17,9 +19,17 @@ impl World {
         self.components.insert(TypeId::of::<C>(), Box::new(C::Storage::new()))
     }
     
+
     // pub fn add_component_instance<C: Component>(&mut self, component: C) -> usize {}
     
-    // pub fn create_entity(&mut self) -> Entity {}
+    pub fn create_entity(&mut self) -> Entity {
+        let e = Entity {
+            id: self.next_entity_id,
+        };
+        self.entities.push(e);
+        self.next_entity_id += 1;
+        e    
+    }
     
     pub fn add_component_to_entity<C: Component>(&mut self, entity: Entity, component: C) {}
     
