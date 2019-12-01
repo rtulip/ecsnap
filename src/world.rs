@@ -48,7 +48,8 @@ impl World {
 #[cfg(test)]
 mod test_world {
 
-    use crate::{Component, World};
+    use crate::{Component, World, Eid};
+    use std::collections::HashMap;
     #[test]
     fn test_register_component() {
 
@@ -60,9 +61,8 @@ mod test_world {
         }
 
         impl Component for Pos {
-            type Storage = Vec<Self>;
+            type Storage = HashMap<Eid, Self>;
         }
-
 
         let mut world: World = Default::default();
         let val = world.register_component::<Pos>();
