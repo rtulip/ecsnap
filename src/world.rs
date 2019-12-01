@@ -36,13 +36,17 @@ impl World {
     
     pub fn get_component_for_entity<C: Component>(&self, entity: &Entity) -> Option<&C> {
 
-        let storage = self.components[&TypeId::of::<C>()]
+        let storage = self.components.get(&TypeId::of::<C>())
+            .unwrap()
             .downcast_ref::<C::Storage>()
             .unwrap();
         storage.get(&entity.id)
     }
     
-    pub fn remove_component_from_entity<C: Component>(&mut self, entity: Entity, component: &C) {}
+    pub fn remove_component_from_entity<C: Component>(&mut self, entity: &Entity) -> Option<C> {
+        let storage = self.components.get_mut(&TypeId::of::<C>()).unwrap().downcast_mut::<C::Storage>().unwrap();
+        storage.remove(&entity.id)
+    }
 
     fn destroy_entity(&mut self, entity: Entity) {}
 
