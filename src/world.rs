@@ -1,6 +1,7 @@
 use crate::{
     Component,
     Entity,
+    Eid,
     GenericStorage,
 };
 use std::any::{Any, TypeId};
@@ -8,9 +9,9 @@ use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct World {
-    pub components: HashMap<TypeId, Box<dyn Any>>,
+    pub components: HashMap<TypeId, Box<dyn Component>>,
     pub entities: Vec<Entity>,
-    next_entity_id: usize,
+    next_entity_id: Eid,
 }
 
 impl World {
@@ -18,9 +19,6 @@ impl World {
     pub fn register_component<C: Component>(&mut self) -> Option<Box<dyn Any>> {
         self.components.insert(TypeId::of::<C>(), Box::new(C::Storage::new()))
     }
-    
-
-    // pub fn add_component_instance<C: Component>(&mut self, component: C) -> usize {}
     
     pub fn create_entity(&mut self) -> Entity {
         let e = Entity {
@@ -31,7 +29,10 @@ impl World {
         e    
     }
     
-    pub fn add_component_to_entity<C: Component>(&mut self, entity: Entity, component: C) {}
+    pub fn add_component_to_entity<C: Component>(&mut self, entity: Entity, component: C) {
+        let storage = self.components.get_mut(&TypeId::of::<C>()).unwrap().downcast_mut::<C::Storage>().unwrap();
+        storage.push(entity.id, component);
+    }
     
     // pub fn get_component_for_entity<C: Component>(&self, entity: Entity) -> Option<&C> {}
     
