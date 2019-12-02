@@ -1,4 +1,4 @@
-use std::any::{Any, TypeId};
+use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
 use crate::{Entity, Eid};
 
@@ -112,58 +112,50 @@ mod test_world {
 
     }
 
-    // #[test]
-    // fn test_remove_component_from_entity() {
+    #[test]
+    fn test_remove_component_from_entity() {
 
-    //     #[derive(Debug)]
-    //     struct Pos {
-    //         x: f64, 
-    //         y: f64,
-    //     }
+        #[derive(Debug)]
+        struct Pos {
+            x: f64, 
+            y: f64,
+        }
 
-    //     #[derive(Debug)]
-    //     struct Vel {
-    //         x: f64, 
-    //         y: f64,
-    //     }
+        #[derive(Debug)]
+        struct Vel {
+            x: f64, 
+            y: f64,
+        }
 
-    //     impl Component for Pos {
-    //         type Storage = MapStorage<Self>;
-    //     }
+        let mut world: World = Default::default();
+        world.register_component::<Pos>();
+        world.register_component::<Vel>();
 
-    //     impl Component for Vel {
-    //         type Storage = MapStorage<Self>;
-    //     }
-
-    //     let mut world: World = Default::default();
-    //     world.register_component::<Pos>();
-    //     world.register_component::<Vel>();
-
-    //     let e = world.create_entity();
+        let e = world.create_entity();
         
-    //     world.add_component_to_entity(&e, Pos {x: 0.0, y: 0.0});
-    //     world.add_component_to_entity(&e, Vel {x: 0.0, y: 0.0});
+        world.add_component_to_entity(&e, Pos {x: 0.0, y: 0.0});
+        world.add_component_to_entity(&e, Vel {x: 0.0, y: 0.0});
 
-    //     let e_pos = world.get_component_for_entity::<Pos>(&e);
-    //     let e_vel = world.get_component_for_entity::<Vel>(&e);
+        let e_pos = world.get_component_for_entity::<Pos>(&e);
+        let e_vel = world.get_component_for_entity::<Vel>(&e);
         
-    //     assert!(e_pos.is_some());
-    //     assert!(e_pos.unwrap().x == 0.0);
-    //     assert!(e_pos.unwrap().y == 0.0);
+        assert!(e_pos.is_some());
+        assert!(e_pos.unwrap().x == 0.0);
+        assert!(e_pos.unwrap().y == 0.0);
 
-    //     assert!(e_vel.is_some());
-    //     assert!(e_vel.unwrap().x == 0.0);
-    //     assert!(e_vel.unwrap().y == 0.0);
+        assert!(e_vel.is_some());
+        assert!(e_vel.unwrap().x == 0.0);
+        assert!(e_vel.unwrap().y == 0.0);
         
-    //     let val = world.remove_component_from_entity::<Vel>(&e);
-    //     assert!(val.is_some());
-    //     let val = val.unwrap().downcast_mut::<Vel>().unwrap();
-    //     assert_eq!(val.x, 0.0);
-    //     assert_eq!(val.y, 0.0);
+        let val = world.remove_component_from_entity::<Vel>(&e);
+        assert!(val.is_some());
+        let val = val.unwrap();
+        assert_eq!((*val).x, 0.0);
+        assert_eq!((*val).y, 0.0);
 
-    //     let val = world.remove_component_from_entity::<Vel>(&e);
-    //     assert!(val.is_none());
-    // }
+        let val = world.remove_component_from_entity::<Vel>(&e);
+        assert!(val.is_none());
+    }
 
 
 }
