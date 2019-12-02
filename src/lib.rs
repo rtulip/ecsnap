@@ -5,4 +5,7 @@ mod component;
 pub use component::Component;
 
 mod entity;
-pub use entity::Entity;
+pub use entity::{Entity, Eid};
+
+mod world;
+pub use world::World;
