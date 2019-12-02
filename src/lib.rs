@@ -1,6 +1,5 @@
 mod entity;
-pub use entity::Entity;
-pub use entity::Eid;
+pub use entity::{Entity, Eid};
 
 mod world;
 pub use world::World;
