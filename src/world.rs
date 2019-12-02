@@ -1,8 +1,6 @@
 use crate::{
-    Component,
     Entity,
     Eid,
-    GenericStorage,
 };
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
@@ -14,25 +12,27 @@ pub struct World {
     next_entity_id: Eid,
 }
 
+type Storage<C> = HashMap<Eid, C>;
+
 impl World {
 
-    fn get_component<C: Component>(&self) -> &C::Storage {
+    fn get_component<C: 'static>(&self) -> &Storage<C> {
         self.components.get(&TypeId::of::<C>())
             .unwrap()
-            .downcast_ref::<C::Storage>()
+            .downcast_ref::<Storage<C>>()
             .unwrap()
 
     }
     
-    fn get_mut_component<C: Component>(&mut self) -> &mut C::Storage {
+    fn get_mut_component<C: 'static>(&mut self) -> &mut Storage<C> {
         self.components.get_mut(&TypeId::of::<C>())
             .unwrap()
-            .downcast_mut::<C::Storage>()
+            .downcast_mut::<Storage<C>>()
             .unwrap()
     }
 
-    pub fn register_component<C: Component>(&mut self) -> Option<Box<dyn Any>> {
-        self.components.insert(TypeId::of::<C>(), Box::new(C::Storage::new()))
+    pub fn register_component<C: 'static>(&mut self) -> Option<Box<dyn Any>> {
+        self.components.insert(TypeId::of::<C>(), Box::new(Storage::<C>::new()))
     }
     
     pub fn create_entity(&mut self) -> Entity {
@@ -44,15 +44,15 @@ impl World {
         e
     }
     
-    pub fn add_component_to_entity<C: Component>(&mut self, entity: Entity, component: C) -> Option<C> {
-        self.get_mut_component::<C>().push(entity.id, component)
+    pub fn add_component_to_entity<C: 'static>(&mut self, entity: Entity, component: C) -> Option<C> {
+        self.get_mut_component::<C>().insert(entity.id, component)
     }
     
-    pub fn get_component_for_entity<C: Component>(&self, entity: &Entity) -> Option<&C> {
+    pub fn get_component_for_entity<C: 'static>(&self, entity: &Entity) -> Option<&C> {
         self.get_component::<C>().get(&entity.id)
     }
     
-    pub fn remove_component_from_entity<C: Component>(&mut self, entity: &Entity) -> Option<C> {
+    pub fn remove_component_from_entity<C: 'static>(&mut self, entity: &Entity) -> Option<C> {
         self.get_mut_component::<C>().remove(&entity.id)
     }
 
@@ -63,18 +63,13 @@ impl World {
 #[cfg(test)]
 mod test_world {
 
-    use crate::{Component, World, Eid};
-    use std::collections::HashMap;
+    use crate::{World};
     #[test]
     fn test_register_component() {
 
         struct Pos {
             _x: f64, 
             _y: f64,
-        }
-
-        impl Component for Pos {
-            type Storage = HashMap<Eid, Self>;
         }
 
         let mut world: World = Default::default();
@@ -98,14 +93,6 @@ mod test_world {
         struct Vel {
             x: f64, 
             y: f64,
-        }
-
-        impl Component for Pos {
-            type Storage = HashMap<Eid, Self>;
-        }
-
-        impl Component for Vel {
-            type Storage = HashMap<Eid, Self>;
         }
 
         let mut world: World = Default::default();
@@ -155,14 +142,6 @@ mod test_world {
         struct Vel {
             x: f64, 
             y: f64,
-        }
-
-        impl Component for Pos {
-            type Storage = HashMap<Eid, Self>;
-        }
-
-        impl Component for Vel {
-            type Storage = HashMap<Eid, Self>;
         }
 
         let mut world: World = Default::default();
