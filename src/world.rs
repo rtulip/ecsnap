@@ -41,13 +41,15 @@ impl World {
             
     }
 
-    // fn destroy_entity(&mut self, entity: &Entity) {}
+    pub fn destroy_entity(&mut self, entity: &Eid) -> Option<Entity> {
+        self.entities.remove(entity)
+    }
+
 }
 
 #[cfg(test)]
 mod test_world {
 
-    
     use crate::World;
     #[test]
     fn test_register_component() {
@@ -157,5 +159,39 @@ mod test_world {
         assert!(val.is_none());
     }
 
+    #[test]
+    fn test_destroy_entity() {
+
+        #[derive(Debug)]
+        struct Pos {
+            x: f64, 
+            y: f64,
+        }
+
+        #[derive(Debug)]
+        struct Vel {
+            x: f64, 
+            y: f64,
+        }
+
+        let mut world: World = Default::default();
+        world.register_component::<Pos>();
+        world.register_component::<Vel>();
+
+        let e1 = world.create_entity();
+        let e2 = world.create_entity();
+
+        world.add_component_to_entity(&e1, Pos {x: 0.0, y: 0.0});
+        world.add_component_to_entity(&e1, Vel {x: 0.0, y: 0.0});
+        world.add_component_to_entity(&e2, Pos {x: 3.0, y: 3.0});
+
+        world.destroy_entity(&e1);
+
+        let dead_e = world.entities.get(&e1);
+        assert!(dead_e.is_none());
+        let alive_e = world.entities.get(&e2);
+        assert!(alive_e.is_some());
+        
+    }
 
 }
