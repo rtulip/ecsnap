@@ -1,5 +1,5 @@
 mod storage;
-pub use storage::GenericStorage;
+pub use storage::{GenericStorage, MapStorage};
 
 mod component;
 pub use component::Component;

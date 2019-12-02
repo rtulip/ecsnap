@@ -14,9 +14,11 @@ impl Entity {
     }
 
     pub fn get_component<C: Component>(&self) -> Option<&C> {
-        self.components.get(&TypeId::of::<C>())
-            .unwrap()
-            .downcast_ref::<C>()
+        if let Some(bx) = self.components.get(&TypeId::of::<C>()) {
+            bx.downcast_ref::<C>()
+        } else {
+            None
+        }
     }
 
     pub fn get_mut_component<C: Component>(&mut self) -> Option<&mut C> {

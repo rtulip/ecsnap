@@ -1,33 +1,36 @@
+use std::collections::HashMap;
+use crate::Eid;
+
 pub trait GenericStorage<T> {
     fn new() -> Self
     where
         Self: Sized;
-    fn push(&mut self, value: T) -> usize;
-    fn get(&self, index: usize) -> &T;
+    fn push(&mut self, key: Eid, value: T) -> Option<T>;
+    fn get(&self, index: &Eid) -> Option<&T>;
     fn len(&self) -> usize;
-    fn remove(&mut self, index: usize) -> T;
+    fn remove(&mut self, index: &Eid) -> Option<T>;
 }
+pub type MapStorage<T> = HashMap<Eid, T>;
 
-impl<T> GenericStorage<T> for Vec<T> {
+impl<T> GenericStorage<T> for MapStorage<T> {
     fn new() -> Self {
-        return Vec::new();
+        return MapStorage::new();
     }
 
-    fn push(&mut self, value: T) -> usize {
-        Vec::push(self, value);
-        self.len() - 1
+    fn push(&mut self, key: Eid, value: T) -> Option<T> {
+        MapStorage::insert(self, key, value)
     }
 
-    fn get(&self, index: usize) -> &T {
-        &self[index]
+    fn get(&self, index: &Eid) -> Option<&T> {
+        MapStorage::get(self, index)
     }
 
     fn len(&self) -> usize {
         self.len()
     }
 
-    fn remove(&mut self, index: usize) -> T {
-        self.remove(index)
+    fn remove(&mut self, index: &Eid) -> Option<T> {
+        MapStorage::remove(self, index)
     }
     
 }
