@@ -56,7 +56,7 @@ impl World {
         self.get_mut_component::<C>().remove(&entity.id)
     }
 
-    fn destroy_entity(&mut self, entity: &Entity) {}
+    // fn destroy_entity(&mut self, entity: &Entity) {}
 
 }
 
