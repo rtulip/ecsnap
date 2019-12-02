@@ -1,6 +1,6 @@
 use std::any::{Any, TypeId};
 use std::collections::{HashMap, HashSet};
-use crate::{Component, Entity, Eid};
+use crate::{Entity, Eid};
 
 #[derive(Default)]
 pub struct World {
@@ -11,7 +11,7 @@ pub struct World {
 
 impl World {
 
-    pub fn register_component<C: Component>(&mut self) -> bool {
+    pub fn register_component<C: 'static>(&mut self) -> bool {
         self.component_ids.insert(TypeId::of::<C>())
     }
     
@@ -22,19 +22,19 @@ impl World {
         id
     }
     
-    pub fn add_component_to_entity<C: Component>(&mut self, entity: &Eid, component: C) -> Option<Box<dyn Any>>{
+    pub fn add_component_to_entity<C: 'static>(&mut self, entity: &Eid, component: C) -> Option<Box<C>>{
         self.entities.get_mut(entity)
             .unwrap()
             .add_component(component)
     }
     
-    pub fn get_component_for_entity<C: Component>(&self, entity: &Eid) -> Option<&C> {
+    pub fn get_component_for_entity<C: 'static>(&self, entity: &Eid) -> Option<&C> {
         self.entities.get(entity)
             .unwrap()
             .get_component::<C>()
     }
     
-    pub fn remove_component_from_entity<C: Component>(&mut self, entity: &Eid) -> Option<Box<dyn Any>> {
+    pub fn remove_component_from_entity<C: 'static>(&mut self, entity: &Eid) -> Option<Box<C>> {
         self.entities.get_mut(entity)
             .unwrap()
             .remove_component::<C>() 
@@ -48,17 +48,13 @@ impl World {
 mod test_world {
 
     
-    use crate::{Component, World, MapStorage};
+    use crate::World;
     #[test]
     fn test_register_component() {
 
         struct Pos {
             _x: f64, 
             _y: f64,
-        }
-
-        impl Component for Pos {
-            type Storage = MapStorage<Self>;
         }
 
         let mut world: World = Default::default();
@@ -81,14 +77,6 @@ mod test_world {
         struct Vel {
             x: f64, 
             y: f64,
-        }
-
-        impl Component for Pos {
-            type Storage = MapStorage<Self>;
-        }
-
-        impl Component for Vel {
-            type Storage = MapStorage<Self>;
         }
 
         let mut world: World = Default::default();
