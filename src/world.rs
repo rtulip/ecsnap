@@ -50,6 +50,7 @@ impl World {
 #[cfg(test)]
 mod test_world {
 
+
     use crate::World;
     #[test]
     fn test_register_component() {
@@ -63,7 +64,6 @@ mod test_world {
         let val = world.register_component::<Pos>();
 
         assert!(val);
-
     }
 
     #[test]
@@ -92,6 +92,7 @@ mod test_world {
         assert!(val.is_none());
         world.add_component_to_entity(&e1, Vel {x: 0.0, y: 0.0});
         world.add_component_to_entity(&e2, Pos {x: 3.0, y: 3.0});
+
 
         let e1_pos = world.get_component_for_entity::<Pos>(&e1);
         let e1_vel = world.get_component_for_entity::<Vel>(&e1);
@@ -154,6 +155,7 @@ mod test_world {
         let val = val.unwrap();
         assert_eq!((*val).x, 0.0);
         assert_eq!((*val).y, 0.0);
+
 
         let val = world.remove_component_from_entity::<Vel>(&e);
         assert!(val.is_none());
