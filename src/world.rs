@@ -1,4 +1,4 @@
-use crate::{Eid, Entity, EntityBuilder};
+use crate::{Eid, Entity, EntityBuilder, System, SystemData};
 use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
 
@@ -91,6 +91,16 @@ impl World {
     #[allow(dead_code)]
     pub(crate) fn destroy_entity(&mut self, entity: &Eid) -> Option<Entity> {
         self.entities.remove(entity)
+    }
+
+    pub fn dispatch_system<'a, S: System<'a>>(&'a mut self, sys: &mut S){
+
+        for entity in self.entities.values_mut() {
+            if let Some(data) = S::Data::fetch(entity){
+                sys.run(data);
+            }
+        }
+
     }
 }
 
