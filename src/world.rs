@@ -2,6 +2,8 @@ use crate::{Eid, Entity, EntityBuilder};
 use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
 
+/// `World`
+/// container for all the `Entities`.
 #[derive(Debug, Default)]
 pub struct World {
     component_ids: HashSet<TypeId>,
@@ -10,10 +12,43 @@ pub struct World {
 }
 
 impl World {
+    /// Registers a component which can be used by a system (TODO).
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::World;
+    ///
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// let mut world = World::default();
+    /// world.register_component::<Pos>();
+    /// ```
     pub fn register_component<C: 'static>(&mut self) -> bool {
         self.component_ids.insert(TypeId::of::<C>())
     }
 
+    /// Creates an `EntityBuilder` to start creating an `Entity`. Calling .build() on the
+    /// `EntityBuilder` will add the constructed `Entity` to the `World`.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::World;
+    ///
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// let mut world = World::default();
+    /// world.create_entity()
+    ///     .with(Pos { x: 0.0, y: 0.0 })
+    ///     .build();
+    /// ```
     pub fn create_entity<'a>(&mut self) -> EntityBuilder {
         EntityBuilder::new(self)
     }
@@ -25,7 +60,9 @@ impl World {
         id
     }
 
-    pub fn add_component_to_entity<C: 'static>(
+    /// Adds a component to an `Entity`
+    #[allow(dead_code)]
+    pub(crate) fn add_component_to_entity<C: 'static>(
         &mut self,
         entity: &Eid,
         component: C,
@@ -36,18 +73,24 @@ impl World {
             .add_component(component)
     }
 
-    pub fn get_component_for_entity<C: 'static>(&self, entity: &Eid) -> Option<&C> {
+    #[allow(dead_code)]
+    pub(crate) fn get_component_for_entity<C: 'static>(&self, entity: &Eid) -> Option<&C> {
         self.entities.get(entity).unwrap().get_component::<C>()
     }
 
-    pub fn remove_component_from_entity<C: 'static>(&mut self, entity: &Eid) -> Option<Box<C>> {
+    #[allow(dead_code)]
+    pub(crate) fn remove_component_from_entity<C: 'static>(
+        &mut self,
+        entity: &Eid,
+    ) -> Option<Box<C>> {
         self.entities
             .get_mut(entity)
             .unwrap()
             .remove_component::<C>()
     }
 
-    pub fn destroy_entity(&mut self, entity: &Eid) -> Option<Entity> {
+    #[allow(dead_code)]
+    pub(crate) fn destroy_entity(&mut self, entity: &Eid) -> Option<Entity> {
         self.entities.remove(entity)
     }
 }

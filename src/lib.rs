@@ -10,8 +10,8 @@
     unused_qualifications
 )]
 
-/// ECSnap an Entity Component System designed to be packaged into UDP Packets for
-/// Snapshot Interpolation of multiplayer games.
+//! ECSnap an Entity Component System designed to be packaged into UDP Packets for
+//! Snapshot Interpolation of multiplayer games.
 mod entity;
 pub use entity::{Eid, Entity, EntityBuilder};
 
