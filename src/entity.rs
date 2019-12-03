@@ -1,17 +1,45 @@
+use crate::World;
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
-use crate::World;
 
+/// Type for entity identifier
 pub type Eid = usize;
-#[derive(Default)]
+
+/// A collection for a series of components.
+#[derive(Debug, Default)]
 pub struct Entity {
-    pub components: HashMap<TypeId, Box<dyn Any>>
+    /// A Hashmap used to store the components of the entities.
+    pub components: HashMap<TypeId, Box<dyn Any>>,
 }
 
 impl Entity {
+    /// Adds a component C to the `Entity`. If the `Entity` didn't have a component of
+    /// type C already, None is returned. If the `Entity` already had a component of type
+    /// C, the component is replaced and the old Boxed component is retured.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::Entity;
+    ///
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// let mut e = Entity::default();
+    /// e.add_component(Pos { x: 0.0, y: 0.0 });
+    ///
+    /// let pos = e.get_component::<Pos>().unwrap();
+    /// assert_eq!(pos.x, 0.0);
+    /// assert_eq!(pos.y, 0.0);
+    /// ```
     pub fn add_component<C: 'static>(&mut self, component: C) -> Option<Box<C>> {
-        if let Some(bx) = self.components.insert(TypeId::of::<C>(), Box::new(component)){
-            if let Ok(comp) = bx.downcast::<C>(){
+        if let Some(bx) = self
+            .components
+            .insert(TypeId::of::<C>(), Box::new(component))
+        {
+            if let Ok(comp) = bx.downcast::<C>() {
                 Some(comp)
             } else {
                 panic!();
@@ -19,9 +47,28 @@ impl Entity {
         } else {
             None
         }
-
     }
 
+    /// Gets a reference to a component C for an `Entity` if the `Entity` has such a
+    /// component, otherwise None is returned.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::Entity;
+    ///
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// let mut e = Entity::default();
+    /// e.add_component(Pos { x: 0.0, y: 0.0 });
+    ///
+    /// let pos = e.get_component::<Pos>().unwrap();
+    /// assert_eq!(pos.x, 0.0);
+    /// assert_eq!(pos.y, 0.0);
+    /// ```
     pub fn get_component<C: 'static>(&self) -> Option<&C> {
         if let Some(bx) = self.components.get(&TypeId::of::<C>()) {
             bx.downcast_ref::<C>()
@@ -30,15 +77,55 @@ impl Entity {
         }
     }
 
+    /// Gets a component C for an `Entity`. If the `Entity` has a Component C, a
+    /// reference to the component is returned, otherwise None is returned.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::Entity;
+    ///
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// let mut e = Entity::default();
+    /// e.add_component(Pos { x: 0.0, y: 0.0 });
+    ///
+    /// let pos = e.get_component::<Pos>().unwrap();
+    /// assert_eq!(pos.x, 0.0);
+    /// assert_eq!(pos.y, 0.0);
+    /// ```
     pub fn get_mut_component<C: 'static>(&mut self) -> Option<&mut C> {
-        self.components.get_mut(&TypeId::of::<C>())
+        self.components
+            .get_mut(&TypeId::of::<C>())
             .unwrap()
             .downcast_mut::<C>()
     }
 
+    /// Removes a component C from an `Entity` if it had such a component. If it had a
+    /// component C, then a Boxed<C> is returned, otherwise, None is returned.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::Entity;
+    ///
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// let mut e = Entity::default();
+    /// e.add_component(Pos { x: 0.0, y: 0.0 });
+    /// let pos = e.remove_component::<Pos>().unwrap();
+    /// assert_eq!((*pos).x, 0.0);
+    /// assert_eq!((*pos).y, 0.0);
+    /// ```
     pub fn remove_component<C: 'static>(&mut self) -> Option<Box<C>> {
         if let Some(bx) = self.components.remove(&TypeId::of::<C>()) {
-            if let Ok(comp) = bx.downcast::<C>(){
+            if let Ok(comp) = bx.downcast::<C>() {
                 Some(comp)
             } else {
                 panic!();
@@ -49,53 +136,80 @@ impl Entity {
     }
 }
 
+/// A helper struct to construct `Entities` with components.
+///
+/// # Example
+/// ```
+/// extern crate ecsnap;
+/// use ecsnap::World;
+///
+/// struct Pos {
+///     x: f64,
+///     y: f64,
+/// }
+///
+/// let mut world = World::default();
+/// world
+///     .create_entity()
+///     .with(Pos { x: 0.0, y: 0.0})
+///     .build();
+/// ```
+#[derive(Debug)]
 pub struct EntityBuilder<'a> {
     entity: Entity,
-    world: &'a mut World
+    world: &'a mut World,
 }
 
 impl<'a> EntityBuilder<'a> {
-    pub fn new(world: &'a mut World) -> Self {
-        EntityBuilder{
+    pub(crate) fn new(world: &'a mut World) -> Self {
+        EntityBuilder {
             entity: Entity::default(),
             world,
         }
     }
 
+    /// Adds a component to the `Entity` being constructed.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::World;
+    ///
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// let mut world = World::default();
+    /// world
+    ///     .create_entity()
+    ///     .with(Pos { x: 0.0, y: 0.0})
+    ///     .build();
+    /// ```
     pub fn with<C: 'static>(mut self, component: C) -> Self {
         self.entity.add_component(component);
         self
     }
 
+    /// Finishes building the `Entity` and returns the Eid of the newly bulit entity.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::World;
+    ///
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// let mut world = World::default();
+    /// world
+    ///     .create_entity()
+    ///     .with(Pos { x: 0.0, y: 0.0})
+    ///     .build();
+    /// ```
     pub fn build(self) -> Eid {
         self.world.insert_entity(self.entity)
-    }   
-}
-
-#[cfg(test)]
-mod entity_tests {
-
-    use crate::World;
-
-    #[test]
-    fn test_entity_bulider() {
-
-        struct Pos {
-            x: f64,
-            y: f64,
-        }
-
-        let mut world = World::default();
-        let e = world.create_entity()
-            .with(Pos {x: 0.0, y: 0.0})
-            .build();
-
-        let pos = world.get_component_for_entity::<Pos>(&e);
-        assert!(pos.is_some());
-        let pos = pos.unwrap();
-        assert_eq!(pos.x, 0.0);
-        assert_eq!(pos.y, 0.0);
-
     }
-
 }
