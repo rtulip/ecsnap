@@ -1,14 +1,20 @@
-pub trait SystemData {}
+pub trait SystemData<'a> {}
 
-pub trait System {
-    type Data: SystemData; 
+pub type Read<'a, T> = &'a T;
+pub type Write<'a, T> = &'a mut T;
+
+impl<'a, T> SystemData<'a> for Read<'a, T> {}
+impl<'a, T> SystemData<'a> for Write<'a, T> {}
+
+pub trait System<'a> {
+    type Data: SystemData<'a>; 
     fn run(&mut self, data: Self::Data);
 }
 
 #[cfg(test)]
 mod test_system {
 
-    use crate::World;
+    use crate::{World, System, Read};
 
     #[test]
     fn ideal() {
@@ -24,13 +30,13 @@ mod test_system {
 
         struct MvtSys {}
 
-        // impl System for MvtSys {
-        //     Data = Read<Pos>;
+        impl<'a> System<'a> for MvtSys {
+            type Data = Read<'a, Pos>;
 
-        //     fn run(&mut self, data: Self::Data) {
-        //         println!("Pos: {:?}", data);
-        //     }
-        // }
+            fn run(&mut self, data: Self::Data) {
+                println!("Pos: {:?}", data);
+            }
+        }
     }
 
 }
