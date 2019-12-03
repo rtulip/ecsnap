@@ -17,3 +17,6 @@ pub use entity::{Eid, Entity, EntityBuilder};
 
 mod world;
 pub use world::World;
+
+mod system;
+pub use system::{System, SystemData};
