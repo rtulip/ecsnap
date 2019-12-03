@@ -137,48 +137,81 @@ impl Entity {
     }
 }
 
+/// `EntityBuilder`
+/// Helper struct to construct `Entities` with components.
+///
+/// # Example
+/// ```
+/// extern crate ecsnap;
+/// use ecsnap::World;
+///
+/// struct Pos {
+///     x: f64,
+///     y: f64,
+/// }
+///
+/// let mut world = World::default();
+/// world
+///     .create_entity()
+///     .with(Pos { x: 0.0, y: 0.0})
+///     .build();
+/// ```
+#[derive(Debug)]
 pub struct EntityBuilder<'a> {
     entity: Entity,
     world: &'a mut World,
 }
 
 impl<'a> EntityBuilder<'a> {
-    pub fn new(world: &'a mut World) -> Self {
+    pub(crate) fn new(world: &'a mut World) -> Self {
         EntityBuilder {
             entity: Entity::default(),
             world,
         }
     }
 
+    /// Adds a component to the `Entity` being constructed.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::World;
+    ///
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// let mut world = World::default();
+    /// world
+    ///     .create_entity()
+    ///     .with(Pos { x: 0.0, y: 0.0})
+    ///     .build();
+    /// ```
     pub fn with<C: 'static>(mut self, component: C) -> Self {
         self.entity.add_component(component);
         self
     }
 
+    /// Finishes building the `Entity` and returns the Eid of the newly bulit entity.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::World;
+    ///
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// let mut world = World::default();
+    /// world
+    ///     .create_entity()
+    ///     .with(Pos { x: 0.0, y: 0.0})
+    ///     .build();
+    /// ```
     pub fn build(self) -> Eid {
         self.world.insert_entity(self.entity)
-    }
-}
-
-#[cfg(test)]
-mod entity_tests {
-
-    use crate::World;
-
-    #[test]
-    fn test_entity_bulider() {
-        struct Pos {
-            x: f64,
-            y: f64,
-        }
-
-        let mut world = World::default();
-        let e = world.create_entity().with(Pos { x: 0.0, y: 0.0 }).build();
-
-        let pos = world.get_component_for_entity::<Pos>(&e);
-        assert!(pos.is_some());
-        let pos = pos.unwrap();
-        assert_eq!(pos.x, 0.0);
-        assert_eq!(pos.y, 0.0);
     }
 }
