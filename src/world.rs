@@ -2,8 +2,7 @@ use crate::{Eid, Entity, EntityBuilder};
 use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
 
-/// `World`
-/// container for all the `Entities`.
+/// A container for all the `Entities`.
 #[derive(Debug, Default)]
 pub struct World {
     component_ids: HashSet<TypeId>,

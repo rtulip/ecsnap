@@ -5,8 +5,7 @@ use std::collections::HashMap;
 /// Type for entity identifier
 pub type Eid = usize;
 
-/// `Entity`
-/// A collection for a series of components
+/// A collection for a series of components.
 #[derive(Debug, Default)]
 pub struct Entity {
     /// A Hashmap used to store the components of the entities.
@@ -137,8 +136,7 @@ impl Entity {
     }
 }
 
-/// `EntityBuilder`
-/// Helper struct to construct `Entities` with components.
+/// A helper struct to construct `Entities` with components.
 ///
 /// # Example
 /// ```
