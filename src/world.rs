@@ -1,6 +1,6 @@
 use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
-use crate::{Entity, Eid};
+use crate::{Entity, EntityBuilder, Eid};
 
 #[derive(Default)]
 pub struct World {
@@ -15,9 +15,13 @@ impl World {
         self.component_ids.insert(TypeId::of::<C>())
     }
     
-    pub fn create_entity(&mut self) -> Eid {
+    pub fn create_entity<'a>(&mut self) -> EntityBuilder {
+        EntityBuilder::new(self)
+    }
+
+    pub(crate) fn insert_entity(&mut self, e: Entity) -> Eid {
         let id = self.next_entity_id;
-        self.entities.insert(id, Entity::default());
+        self.entities.insert(id, e);
         self.next_entity_id += 1;
         id
     }
@@ -49,7 +53,6 @@ impl World {
 
 #[cfg(test)]
 mod test_world {
-
 
     use crate::World;
     #[test]
@@ -85,14 +88,13 @@ mod test_world {
         world.register_component::<Pos>();
         world.register_component::<Vel>();
 
-        let e1 = world.create_entity();
-        let e2 = world.create_entity();
-
-        let val = world.add_component_to_entity(&e1, Pos {x: 0.0, y: 0.0});
-        assert!(val.is_none());
-        world.add_component_to_entity(&e1, Vel {x: 0.0, y: 0.0});
-        world.add_component_to_entity(&e2, Pos {x: 3.0, y: 3.0});
-
+        let e1 = world.create_entity()
+            .with(Pos { x: 0.0, y: 0.0})
+            .with(Vel { x: 0.0, y: 0.0})
+            .build();
+        let e2 = world.create_entity()
+            .with(Pos { x: 3.0, y: 3.0})
+            .build();
 
         let e1_pos = world.get_component_for_entity::<Pos>(&e1);
         let e1_vel = world.get_component_for_entity::<Vel>(&e1);
@@ -134,11 +136,11 @@ mod test_world {
         world.register_component::<Pos>();
         world.register_component::<Vel>();
 
-        let e = world.create_entity();
+        let e = world.create_entity()
+            .with(Pos {x: 0.0, y: 0.0})
+            .with(Vel {x: 0.0, y: 0.0})
+            .build();
         
-        world.add_component_to_entity(&e, Pos {x: 0.0, y: 0.0});
-        world.add_component_to_entity(&e, Vel {x: 0.0, y: 0.0});
-
         let e_pos = world.get_component_for_entity::<Pos>(&e);
         let e_vel = world.get_component_for_entity::<Vel>(&e);
         
@@ -180,12 +182,13 @@ mod test_world {
         world.register_component::<Pos>();
         world.register_component::<Vel>();
 
-        let e1 = world.create_entity();
-        let e2 = world.create_entity();
-
-        world.add_component_to_entity(&e1, Pos {x: 0.0, y: 0.0});
-        world.add_component_to_entity(&e1, Vel {x: 0.0, y: 0.0});
-        world.add_component_to_entity(&e2, Pos {x: 3.0, y: 3.0});
+        let e1 = world.create_entity()
+            .with(Pos {x: 0.0, y: 0.0})
+            .with(Vel {x: 0.0, y: 0.0})
+            .build();
+        let e2 = world.create_entity()
+            .with(Pos {x: 0.0, y: 0.0})
+            .build();
 
         world.destroy_entity(&e1);
 
