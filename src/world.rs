@@ -93,12 +93,13 @@ impl World {
         self.entities.remove(entity)
     }
 
-    pub fn dispatch_system<'a, S: System<'a>>(&'a mut self, sys: &mut S){
-        use crate::{System, SystemData};
-
-        let data = S::Data;
-
+    pub fn dispatch_system<'a, S: System<'a>>(&'a mut self, sys: &mut S) {
         
+        for entity in self.entities.values() {
+            if let Some(data) = S::Data::fetch(entity) {
+                sys.run(data);
+            }
+        }
 
     }
 }
