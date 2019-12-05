@@ -149,7 +149,7 @@ impl Entity {
         data.set(self);
     }
 }
-
+    
 /// A helper struct to construct `Entities` with components.
 ///
 /// # Example
