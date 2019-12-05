@@ -1,4 +1,4 @@
-use crate::World;
+use crate::{Component, System, SystemData, World};
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 
@@ -20,12 +20,14 @@ impl Entity {
     /// # Example
     /// ```
     /// extern crate ecsnap;
-    /// use ecsnap::Entity;
+    /// use ecsnap::{Component, Entity};
     ///
+    /// #[derive(Debug, Clone, Copy)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
+    /// impl Component for Pos {}
     ///
     /// let mut e = Entity::default();
     /// e.add_component(Pos { x: 0.0, y: 0.0 });
@@ -34,7 +36,7 @@ impl Entity {
     /// assert_eq!(pos.x, 0.0);
     /// assert_eq!(pos.y, 0.0);
     /// ```
-    pub fn add_component<C: 'static>(&mut self, component: C) -> Option<Box<C>> {
+    pub fn add_component<C: Component>(&mut self, component: C) -> Option<Box<C>> {
         if let Some(bx) = self
             .components
             .insert(TypeId::of::<C>(), Box::new(component))
@@ -55,12 +57,14 @@ impl Entity {
     /// # Example
     /// ```
     /// extern crate ecsnap;
-    /// use ecsnap::Entity;
+    /// use ecsnap::{Component, Entity};
     ///
+    /// #[derive(Debug, Clone, Copy)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
+    /// impl Component for Pos {}
     ///
     /// let mut e = Entity::default();
     /// e.add_component(Pos { x: 0.0, y: 0.0 });
@@ -69,7 +73,7 @@ impl Entity {
     /// assert_eq!(pos.x, 0.0);
     /// assert_eq!(pos.y, 0.0);
     /// ```
-    pub fn get_component<C: 'static>(&self) -> Option<&C> {
+    pub fn get_component<C: Component>(&self) -> Option<&C> {
         if let Some(bx) = self.components.get(&TypeId::of::<C>()) {
             bx.downcast_ref::<C>()
         } else {
@@ -83,12 +87,14 @@ impl Entity {
     /// # Example
     /// ```
     /// extern crate ecsnap;
-    /// use ecsnap::Entity;
+    /// use ecsnap::{Component, Entity};
     ///
+    /// #[derive(Debug, Clone, Copy)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
+    /// impl Component for Pos {}
     ///
     /// let mut e = Entity::default();
     /// e.add_component(Pos { x: 0.0, y: 0.0 });
@@ -97,7 +103,7 @@ impl Entity {
     /// assert_eq!(pos.x, 0.0);
     /// assert_eq!(pos.y, 0.0);
     /// ```
-    pub fn get_mut_component<C: 'static>(&mut self) -> Option<&mut C> {
+    pub fn get_mut_component<C: Component>(&mut self) -> Option<&mut C> {
         self.components
             .get_mut(&TypeId::of::<C>())
             .unwrap()
@@ -110,12 +116,14 @@ impl Entity {
     /// # Example
     /// ```
     /// extern crate ecsnap;
-    /// use ecsnap::Entity;
+    /// use ecsnap::{Component, Entity};
     ///
+    /// #[derive(Debug, Clone, Copy)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
+    /// impl Component for Pos {}
     ///
     /// let mut e = Entity::default();
     /// e.add_component(Pos { x: 0.0, y: 0.0 });
@@ -123,7 +131,7 @@ impl Entity {
     /// assert_eq!((*pos).x, 0.0);
     /// assert_eq!((*pos).y, 0.0);
     /// ```
-    pub fn remove_component<C: 'static>(&mut self) -> Option<Box<C>> {
+    pub fn remove_component<C: Component>(&mut self) -> Option<Box<C>> {
         if let Some(bx) = self.components.remove(&TypeId::of::<C>()) {
             if let Ok(comp) = bx.downcast::<C>() {
                 Some(comp)
@@ -134,6 +142,12 @@ impl Entity {
             None
         }
     }
+
+    /// Sets the `SystemData` of this `Entity`. Is called internally in
+    /// `World::dispatch_system`.
+    pub fn set<S: System>(&mut self, data: S::Data) {
+        data.set(self);
+    }
 }
 
 /// A helper struct to construct `Entities` with components.
@@ -141,12 +155,14 @@ impl Entity {
 /// # Example
 /// ```
 /// extern crate ecsnap;
-/// use ecsnap::World;
+/// use ecsnap::{World, Component};
 ///
+/// #[derive(Debug, Clone, Copy)]
 /// struct Pos {
 ///     x: f64,
 ///     y: f64,
 /// }
+/// impl Component for Pos {}
 ///
 /// let mut world = World::default();
 /// world
@@ -173,12 +189,14 @@ impl<'a> EntityBuilder<'a> {
     /// # Example
     /// ```
     /// extern crate ecsnap;
-    /// use ecsnap::World;
+    /// use ecsnap::{World, Component};
     ///
+    /// #[derive(Debug, Clone, Copy)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
+    /// impl Component for Pos {}
     ///
     /// let mut world = World::default();
     /// world
@@ -186,7 +204,7 @@ impl<'a> EntityBuilder<'a> {
     ///     .with(Pos { x: 0.0, y: 0.0})
     ///     .build();
     /// ```
-    pub fn with<C: 'static>(mut self, component: C) -> Self {
+    pub fn with<C: Component>(mut self, component: C) -> Self {
         self.entity.add_component(component);
         self
     }
@@ -196,12 +214,14 @@ impl<'a> EntityBuilder<'a> {
     /// # Example
     /// ```
     /// extern crate ecsnap;
-    /// use ecsnap::World;
+    /// use ecsnap::{World, Component};
     ///
+    /// #[derive(Debug, Clone, Copy)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
+    /// impl Component for Pos {}
     ///
     /// let mut world = World::default();
     /// world

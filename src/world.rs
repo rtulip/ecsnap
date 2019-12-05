@@ -1,4 +1,4 @@
-use crate::{Eid, Entity, EntityBuilder};
+use crate::{Component, Eid, Entity, EntityBuilder, System, SystemData};
 use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
 
@@ -16,17 +16,20 @@ impl World {
     /// # Example
     /// ```
     /// extern crate ecsnap;
-    /// use ecsnap::World;
+    /// use ecsnap::{World, Component};
     ///
+    /// #[derive(Debug, Clone, Copy)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
     ///
+    /// impl Component for Pos {}
+    ///
     /// let mut world = World::default();
     /// world.register_component::<Pos>();
     /// ```
-    pub fn register_component<C: 'static>(&mut self) -> bool {
+    pub fn register_component<C: Component>(&mut self) -> bool {
         self.component_ids.insert(TypeId::of::<C>())
     }
 
@@ -36,12 +39,14 @@ impl World {
     /// # Example
     /// ```
     /// extern crate ecsnap;
-    /// use ecsnap::World;
+    /// use ecsnap::{Component, World};
     ///
+    /// #[derive(Debug, Clone, Copy)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
+    /// impl Component for Pos {}
     ///
     /// let mut world = World::default();
     /// world.create_entity()
@@ -61,7 +66,7 @@ impl World {
 
     /// Adds a component to an `Entity`
     #[allow(dead_code)]
-    pub(crate) fn add_component_to_entity<C: 'static>(
+    pub(crate) fn add_component_to_entity<C: Component>(
         &mut self,
         entity: &Eid,
         component: C,
@@ -73,12 +78,12 @@ impl World {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn get_component_for_entity<C: 'static>(&self, entity: &Eid) -> Option<&C> {
+    pub(crate) fn get_component_for_entity<C: Component>(&self, entity: &Eid) -> Option<&C> {
         self.entities.get(entity).unwrap().get_component::<C>()
     }
 
     #[allow(dead_code)]
-    pub(crate) fn remove_component_from_entity<C: 'static>(
+    pub(crate) fn remove_component_from_entity<C: Component>(
         &mut self,
         entity: &Eid,
     ) -> Option<Box<C>> {
@@ -92,18 +97,87 @@ impl World {
     pub(crate) fn destroy_entity(&mut self, entity: &Eid) -> Option<Entity> {
         self.entities.remove(entity)
     }
+
+    /// Runs a system on the `World`.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::{Component, System, World};
+    ///
+    /// #[derive(Debug, Clone, Copy)]
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// #[derive(Debug, Clone, Copy)]
+    /// struct Vel {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    ///
+    /// impl Component for Pos {}
+    /// impl Component for Vel {}
+    ///
+    /// struct MovementSystem {
+    ///     dt: f64,         
+    /// }
+    ///
+    /// impl System for MovementSystem {
+    ///     type Data = (Pos, Vel);
+    ///     fn run(&mut self, data: &mut Self::Data){
+    ///         let (pos, vel) = data;
+    ///         pos.x += vel.x * self.dt;
+    ///         pos.y += vel.y * self.dt;
+    ///         println!("Updated Position! {:?}", pos);
+    ///         
+    ///     }
+    /// }
+    ///
+    /// let mut mvt = MovementSystem { dt : 0.05 };
+    ///
+    /// let mut world = World::default();
+    /// world
+    ///     .create_entity()
+    ///     .with(Pos {x: 0.0, y: 0.0})
+    ///     .with(Vel {x: 10.0, y: 10.0})
+    ///     .build();
+    ///
+    /// world
+    ///     .create_entity()
+    ///     .with(Pos {x: 0.0, y: 0.0})
+    ///     .build();
+    ///
+    /// world.dispatch_system(&mut mvt);
+    /// world.dispatch_system(&mut mvt);
+    ///
+    /// ```
+    pub fn dispatch_system<S: System>(&mut self, sys: &mut S) {
+        for entity in self.entities.values_mut() {
+            if let Some(data) = S::Data::fetch(entity) {
+                let mut new_data = data.clone();
+                sys.run(&mut new_data);
+                println!("Manipulated Data: {:?}", new_data);
+                entity.set::<S>(new_data);
+            }
+        }
+    }
 }
 
 #[cfg(test)]
 mod test_world {
 
-    use crate::World;
+    use crate::{Component, World};
     #[test]
     fn test_register_component() {
+        #[derive(Debug, Clone, Copy)]
         struct Pos {
             _x: f64,
             _y: f64,
         }
+
+        impl Component for Pos {}
 
         let mut world: World = Default::default();
         let val = world.register_component::<Pos>();
@@ -113,17 +187,20 @@ mod test_world {
 
     #[test]
     fn test_add_component_to_entity() {
-        #[derive(Debug)]
+        #[derive(Debug, Clone, Copy)]
         struct Pos {
             x: f64,
             y: f64,
         }
 
-        #[derive(Debug)]
+        #[derive(Debug, Clone, Copy)]
         struct Vel {
             x: f64,
             y: f64,
         }
+
+        impl Component for Pos {}
+        impl Component for Vel {}
 
         let mut world: World = Default::default();
         world.register_component::<Pos>();
@@ -155,17 +232,20 @@ mod test_world {
 
     #[test]
     fn test_remove_component_from_entity() {
-        #[derive(Debug)]
+        #[derive(Debug, Clone, Copy)]
         struct Pos {
             x: f64,
             y: f64,
         }
 
-        #[derive(Debug)]
+        #[derive(Debug, Clone, Copy)]
         struct Vel {
             x: f64,
             y: f64,
         }
+
+        impl Component for Pos {}
+        impl Component for Vel {}
 
         let mut world: World = Default::default();
         world.register_component::<Pos>();
@@ -199,17 +279,20 @@ mod test_world {
 
     #[test]
     fn test_destroy_entity() {
-        #[derive(Debug)]
+        #[derive(Debug, Clone, Copy)]
         struct Pos {
             x: f64,
             y: f64,
         }
 
-        #[derive(Debug)]
+        #[derive(Debug, Clone, Copy)]
         struct Vel {
             x: f64,
             y: f64,
         }
+
+        impl Component for Pos {}
+        impl Component for Vel {}
 
         let mut world: World = Default::default();
         world.register_component::<Pos>();
