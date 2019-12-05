@@ -1,6 +1,6 @@
 use crate::{Component, Entity};
 
-pub trait SystemData<'a>: Sized {
+pub trait SystemData<'a>: Sized + Clone {
     fn fetch(e: &'a Entity) -> Option<Self>;
 }
 
@@ -25,7 +25,7 @@ impl<'a, A, B> SystemData<'a> for (Query<'a, A>, Query<'a, B>)
 
 pub trait System<'a> {
     type Data: SystemData<'a>; 
-    fn run(&mut self, data: Self::Data);
+    fn run(&mut self, data: &mut Self::Data);
 }
 
 #[cfg(test)]
@@ -51,7 +51,7 @@ mod test_system {
         impl<'a> System<'a> for ReadSys {
             type Data = Query<'a, Pos>;
 
-            fn run(&mut self, data: Self::Data) {
+            fn run(&mut self, data: &mut Self::Data) {
                 println!("Pos: {:?}", data);
             }
         }

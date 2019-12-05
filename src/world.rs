@@ -100,7 +100,8 @@ impl World {
         
         for entity in self.entities.values() {
             if let Some(data) = S::Data::fetch(entity) {
-                sys.run(data);
+                let mut new_data = data.clone();
+                sys.run(&mut new_data);
             }
         }
 
