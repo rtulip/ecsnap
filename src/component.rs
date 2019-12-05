@@ -1,1 +1,1 @@
-pub trait Component: 'static + Clone {}
+pub trait Component: 'static + Clone + Sized {}

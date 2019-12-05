@@ -94,12 +94,11 @@ impl World {
     }
 
     pub fn dispatch_system<'a, S: System<'a>>(&'a mut self, sys: &mut S){
+        use crate::{System, SystemData};
 
-        for entity in self.entities.values_mut() {
-            if let Some(data) = S::Data::fetch(entity){
-                sys.run(data);
-            }
-        }
+        let data = S::Data;
+
+        
 
     }
 }
