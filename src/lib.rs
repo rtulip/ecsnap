@@ -22,4 +22,4 @@ mod world;
 pub use world::World;
 
 mod system;
-pub use system::{System, SystemData, Query};
+pub use system::{System, SystemData};

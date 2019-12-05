@@ -1,33 +1,36 @@
 use crate::{Component, Entity};
+use std::fmt::Debug;
 
-pub trait SystemData<'a>: Sized + Clone {
+pub trait SystemData<'a>: Sized + Clone + Debug {
     fn fetch(e: &'a Entity) -> Option<Self>;
     fn set(self, e:&'a mut Entity);
 }
 
-pub type Query<'a, C> = &'a C;
-
-impl<'a, C> SystemData<'a> for Query<'a, C>
+impl<'a, C> SystemData<'a> for C
     where C: Component {
     fn fetch(e: &'a Entity) -> Option<Self> {
-        e.get_component::<C>()
+        if let Some(c) = e.get_component::<C>() {
+            Some(*c)
+        } else {
+            None
+        }
     }
     fn set(self, e: &'a mut Entity) {
-        e.add_component::<C>(*self);
+        e.add_component::<C>(self);
     }
 }
 
-impl<'a, A, B> SystemData<'a> for (Query<'a, A>, Query<'a, B>) 
+impl<'a, A, B> SystemData<'a> for (A, B) 
     where A: Component, B: Component {
     fn fetch(e: &'a Entity) -> Option<Self> {
         match (e.get_component::<A>(),  e.get_component::<B>()) {
-            (Some(a), Some(b)) => Some((a,b)),
+            (Some(a), Some(b)) => Some((*a,*b)),
             _ => None
         }
     }
     fn set(self, e: &'a mut Entity) {
-        e.add_component::<A>(*self.0);
-        e.add_component::<B>(*self.1);
+        e.add_component::<A>(self.0);
+        e.add_component::<B>(self.1);
     }
 
 }
@@ -40,7 +43,7 @@ pub trait System<'a> {
 #[cfg(test)]
 mod test_system {
 
-    use crate::{World, System, Component, Query};
+    use crate::{World, System, Component};
 
     #[test]
     fn ideal() {
@@ -69,17 +72,21 @@ mod test_system {
         struct ReadSys {}
 
         impl<'a> System<'a> for ReadSys {
-            type Data = (Query<'a, Pos>, Query<'a, Vel>);
+            type Data = (Pos,Vel);
 
             fn run(&mut self, data: &mut Self::Data) {
                 let (pos, vel) = data;
                 println!("Pos: {:?}", pos);
                 println!("Vel: {:?}", vel);
+                pos.x = 10.0;
+                pos.y = 5.0;
+                
             }
         }
 
         let mut rs = ReadSys {};
         println!("Dispatching System!");
+        world.dispatch_system(&mut rs);
         world.dispatch_system(&mut rs);
     }
 
