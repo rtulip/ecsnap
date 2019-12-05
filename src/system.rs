@@ -1,42 +1,42 @@
 use crate::{Component, Entity};
 use std::fmt::Debug;
 
-pub trait SystemData<'a>: Sized + Clone + Debug {
-    fn fetch(e: &'a Entity) -> Option<Self>;
-    fn set(self, e:&'a mut Entity);
+pub trait SystemData: Sized + Clone + Copy + Debug {
+    fn fetch(e: &Entity) -> Option<Self>;
+    fn set(self, e: &mut Entity);
 }
 
-impl<'a, C> SystemData<'a> for C
+impl<C> SystemData for C
     where C: Component {
-    fn fetch(e: &'a Entity) -> Option<Self> {
+    fn fetch(e: &Entity) -> Option<Self> {
         if let Some(c) = e.get_component::<C>() {
             Some(*c)
         } else {
             None
         }
     }
-    fn set(self, e: &'a mut Entity) {
+    fn set(self, e: &mut Entity) {
         e.add_component::<C>(self);
     }
 }
 
-impl<'a, A, B> SystemData<'a> for (A, B) 
+impl<A, B> SystemData for (A, B) 
     where A: Component, B: Component {
-    fn fetch(e: &'a Entity) -> Option<Self> {
+    fn fetch(e: &Entity) -> Option<Self> {
         match (e.get_component::<A>(),  e.get_component::<B>()) {
             (Some(a), Some(b)) => Some((*a,*b)),
             _ => None
         }
     }
-    fn set(self, e: &'a mut Entity) {
+    fn set(self, e: &mut Entity) {
         e.add_component::<A>(self.0);
         e.add_component::<B>(self.1);
     }
 
 }
 
-pub trait System<'a> {
-    type Data: SystemData<'a>; 
+pub trait System {
+    type Data: SystemData; 
     fn run(&mut self, data: &mut Self::Data);
 }
 
@@ -71,16 +71,15 @@ mod test_system {
 
         struct ReadSys {}
 
-        impl<'a> System<'a> for ReadSys {
+        impl System for ReadSys {
             type Data = (Pos,Vel);
 
             fn run(&mut self, data: &mut Self::Data) {
                 let (pos, vel) = data;
                 println!("Pos: {:?}", pos);
                 println!("Vel: {:?}", vel);
-                pos.x = 10.0;
-                pos.y = 5.0;
-                
+                pos.x += 10.0;
+                pos.y += 5.0;
             }
         }
 

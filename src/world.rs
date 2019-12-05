@@ -98,17 +98,18 @@ impl World {
         self.entities.remove(entity)
     }
 
-    pub fn dispatch_system<'a, S: System<'a>>(&'a mut self, sys: &mut S) {
+    pub fn dispatch_system<S: System>(&mut self, sys: &mut S) {
         
-        for entity in self.entities.values() {
+        for entity in self.entities.values_mut() {
             if let Some(data) = S::Data::fetch(entity) {
                 let mut new_data = data.clone();
                 sys.run(&mut new_data);
-                println!("Manipulated Data: {:?}", new_data)
+                println!("Manipulated Data: {:?}", new_data);
+                entity.set::<S>(new_data);
             }
         }
-
     }
+
 }
 
 #[cfg(test)]

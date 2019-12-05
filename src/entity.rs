@@ -1,4 +1,4 @@
-use crate::{World, Component};
+use crate::{Component, System, SystemData, World};
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 
@@ -141,6 +141,10 @@ impl Entity {
         } else {
             None
         }
+    }
+
+    pub fn set<S: System>(&mut self, data: S::Data) {
+        data.set(self);
     }
 }
 
