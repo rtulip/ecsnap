@@ -8,7 +8,7 @@ use std::fmt::Debug;
 /// `SystemData` can be a single `Component` or a tuple of `Components`.
 /// #TODO:
 ///     Allow for generic Component tuple instead of just (A,B).
-pub trait SystemData: Sized + Clone + Copy + Debug {
+pub trait SystemData: Sized + Clone + Debug {
     /// Returns the `SystemData` of an `Entity` if the `Entity` has the requisite
     /// `Components`. If the `Entity` doesn't have the requisite `Components` than `None`
     /// is returned.
@@ -23,7 +23,7 @@ where
 {
     fn fetch(e: &Entity) -> Option<Self> {
         if let Some(c) = e.get_component::<C>() {
-            Some(*c)
+            Some((*c).clone())
         } else {
             None
         }
@@ -40,7 +40,7 @@ where
 {
     fn fetch(e: &Entity) -> Option<Self> {
         match (e.get_component::<A>(), e.get_component::<B>()) {
-            (Some(a), Some(b)) => Some((*a, *b)),
+            (Some(a), Some(b)) => Some(((*a).clone(), (*b).clone())),
             _ => None,
         }
     }
