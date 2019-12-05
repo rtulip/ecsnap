@@ -1,8 +1,19 @@
 use crate::{Component, Entity};
 use std::fmt::Debug;
 
+/// Trait used to define what kind of data can be used to Query in a `System`.
+/// `SystemData` can `fetch` data from an entity if it has the system data. Additionaly, 
+/// `SystemData` can `set` the data to an entity.
+/// 
+/// `SystemData` can be a single `Component` or a tuple of `Components`. 
+/// #TODO: 
+///     Allow for generic Component tuple instead of just (A,B).
 pub trait SystemData: Sized + Clone + Copy + Debug {
+    /// Returns the `SystemData` of an `Entity` if the `Entity` has the requisite
+    /// `Components`. If the `Entity` doesn't have the requisite `Components` than `None` 
+    /// is returned.
     fn fetch(e: &Entity) -> Option<Self>;
+    /// Defines the behaviour for updateing an `Entities` data to some new `SystemData`.
     fn set(self, e: &mut Entity);
 }
 
@@ -35,8 +46,12 @@ impl<A, B> SystemData for (A, B)
 
 }
 
+/// Trait defining a generic System. Any `Entity` with that doens't return `None` to
+/// `System::Data::fetch` will have `run` called on its Data.
 pub trait System {
+    /// Defines the type of data to be queried.
     type Data: SystemData; 
+    /// Defines the behaviour of the system. Gets called in World::system_dispatch.
     fn run(&mut self, data: &mut Self::Data);
 }
 

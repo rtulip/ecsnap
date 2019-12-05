@@ -98,6 +98,61 @@ impl World {
         self.entities.remove(entity)
     }
 
+    /// Runs a system on the `World`. 
+    /// 
+    /// # Example 
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::{Component, System, World};
+    /// 
+    /// #[derive(Debug, Clone, Copy)]
+    /// struct Pos {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    /// 
+    /// #[derive(Debug, Clone, Copy)]
+    /// struct Vel {
+    ///     x: f64,
+    ///     y: f64,
+    /// }
+    /// 
+    /// impl Component for Pos {}
+    /// impl Component for Vel {}
+    /// 
+    /// struct MovementSystem {
+    ///     dt: f64,         
+    /// }
+    /// 
+    /// impl System for MovementSystem {
+    ///     type Data = (Pos, Vel);
+    ///     fn run(&mut self, data: &mut Self::Data){
+    ///         let (pos, vel) = data;
+    ///         pos.x += vel.x * self.dt;
+    ///         pos.y += vel.y * self.dt;
+    ///         println!("Updated Position! {:?}", pos);
+    ///         
+    ///     }
+    /// }
+    /// 
+    /// let mut mvt = MovementSystem { dt : 0.05 };
+    /// 
+    /// let mut world = World::default();
+    /// world
+    ///     .create_entity()
+    ///     .with(Pos {x: 0.0, y: 0.0})
+    ///     .with(Vel {x: 10.0, y: 10.0})
+    ///     .build();
+    /// 
+    /// world
+    ///     .create_entity()
+    ///     .with(Pos {x: 0.0, y: 0.0})
+    ///     .build();
+    /// 
+    /// world.dispatch_system(&mut mvt);
+    /// world.dispatch_system(&mut mvt);
+    /// 
+    /// ```
     pub fn dispatch_system<S: System>(&mut self, sys: &mut S) {
         
         for entity in self.entities.values_mut() {

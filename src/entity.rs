@@ -143,6 +143,8 @@ impl Entity {
         }
     }
 
+    /// Sets the `SystemData` of this `Entity`. Is called internally in 
+    /// `World::dispatch_system`.
     pub fn set<S: System>(&mut self, data: S::Data) {
         data.set(self);
     }
