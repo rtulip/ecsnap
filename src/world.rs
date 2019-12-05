@@ -16,12 +16,15 @@ impl World {
     /// # Example
     /// ```
     /// extern crate ecsnap;
-    /// use ecsnap::World;
+    /// use ecsnap::{World, Component};
     ///
+    /// #[derive(Debug, Clone)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
+    /// 
+    /// impl Component for Pos {}
     ///
     /// let mut world = World::default();
     /// world.register_component::<Pos>();
