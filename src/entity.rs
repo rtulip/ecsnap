@@ -124,7 +124,7 @@ impl Entity {
     ///     y: f64,
     /// }
     /// impl Component for Pos {}
-    /// 
+    ///
     /// let mut e = Entity::default();
     /// e.add_component(Pos { x: 0.0, y: 0.0 });
     /// let pos = e.remove_component::<Pos>().unwrap();
@@ -143,7 +143,7 @@ impl Entity {
         }
     }
 
-    /// Sets the `SystemData` of this `Entity`. Is called internally in 
+    /// Sets the `SystemData` of this `Entity`. Is called internally in
     /// `World::dispatch_system`.
     pub fn set<S: System>(&mut self, data: S::Data) {
         data.set(self);
