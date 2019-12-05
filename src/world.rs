@@ -110,6 +110,7 @@ mod test_world {
     use crate::{Component, World};
     #[test]
     fn test_register_component() {
+        #[derive(Debug, Clone)]
         struct Pos {
             _x: f64,
             _y: f64,
@@ -125,13 +126,13 @@ mod test_world {
 
     #[test]
     fn test_add_component_to_entity() {
-        #[derive(Debug)]
+        #[derive(Debug, Clone)]
         struct Pos {
             x: f64,
             y: f64,
         }
 
-        #[derive(Debug)]
+        #[derive(Debug, Clone)]
         struct Vel {
             x: f64,
             y: f64,
@@ -170,13 +171,13 @@ mod test_world {
 
     #[test]
     fn test_remove_component_from_entity() {
-        #[derive(Debug)]
+        #[derive(Debug, Clone)]
         struct Pos {
             x: f64,
             y: f64,
         }
 
-        #[derive(Debug)]
+        #[derive(Debug, Clone)]
         struct Vel {
             x: f64,
             y: f64,
@@ -217,13 +218,13 @@ mod test_world {
 
     #[test]
     fn test_destroy_entity() {
-        #[derive(Debug)]
+        #[derive(Debug, Clone)]
         struct Pos {
             x: f64,
             y: f64,
         }
 
-        #[derive(Debug)]
+        #[derive(Debug, Clone)]
         struct Vel {
             x: f64,
             y: f64,
