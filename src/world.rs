@@ -53,7 +53,7 @@ impl World {
     ///     .with(Pos { x: 0.0, y: 0.0 })
     ///     .build();
     /// ```
-    pub fn create_entity<'a>(&mut self) -> EntityBuilder {
+    pub fn create_entity(&mut self) -> EntityBuilder {
         EntityBuilder::new(self)
     }
 
