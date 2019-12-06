@@ -64,22 +64,16 @@ impl World {
         id
     }
 
-    /// Adds a component to an `Entity`
     #[allow(dead_code)]
-    pub(crate) fn add_component_to_entity<C: Component>(
-        &mut self,
+    pub(crate) fn get_component_for_entity<C: Component>(
+        &self, 
         entity: &Eid,
-        component: C,
-    ) -> Option<Box<C>> {
-        self.entities
-            .get_mut(entity)
-            .unwrap()
-            .add_component(component)
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn get_component_for_entity<C: Component>(&self, entity: &Eid) -> Option<&C> {
-        self.entities.get(entity).unwrap().get_component::<C>()
+    ) -> Option<&C> {
+        if let Some(e) = self.entities.get(entity) {
+            e.get_component::<C>()
+        } else {
+            None
+        }
     }
 
     #[allow(dead_code)]
@@ -87,10 +81,11 @@ impl World {
         &mut self,
         entity: &Eid,
     ) -> Option<Box<C>> {
-        self.entities
-            .get_mut(entity)
-            .unwrap()
-            .remove_component::<C>()
+        if let Some(e) = self.entities.get_mut(entity) {
+            e.remove_component::<C>()
+        } else {
+            None
+        }
     }
 
     #[allow(dead_code)]
