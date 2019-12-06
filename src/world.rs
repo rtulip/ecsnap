@@ -65,10 +65,7 @@ impl World {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn get_component_for_entity<C: Component>(
-        &self, 
-        entity: &Eid,
-    ) -> Option<&C> {
+    pub(crate) fn get_component_for_entity<C: Component>(&self, entity: &Eid) -> Option<&C> {
         if let Some(e) = self.entities.get(entity) {
             e.get_component::<C>()
         } else {
