@@ -50,20 +50,18 @@ where
     }
 }
 
+/// Trait defining how to access world `Resources`.
 pub trait ResourceData: Sized + Debug + Clone {
-    fn fetch(w: &World) -> Option<Self>;
-    fn set(self, w: &mut World);
+    /// Fetches the `Resources for the `World`.
+    fn fetch_res(w: &World) -> Option<Self>;
 }
 
 impl<A: 'static + Clone + Debug> ResourceData for A {
-    fn fetch(w: &World) -> Option<Self> {
+    fn fetch_res(w: &World) -> Option<Self> {
         match w.get_resource::<A>() {
             Some(a) => Some((*a).clone()),
             _ => None
         }
-    }
-    fn set(self, w: &mut World) {
-        w.add_resource::<A>(self);
     }
 }
 
@@ -75,7 +73,7 @@ pub trait System {
     /// Defines which `Resources` should be queried.
     type Resources: ResourceData;
     /// Defines the behaviour of the system. Gets called in World::system_dispatch.
-    fn run(&mut self, data: &mut Self::Data);
+    fn run(&mut self, data: &mut Self::Data, res: &Self::Resources);
 }
 
 #[cfg(test)]
@@ -109,7 +107,7 @@ mod test_system {
         impl System for ReadSys {
             type Data = (Pos, Vel);
             type Resources = ();
-            fn run(&mut self, data: &mut Self::Data) {
+            fn run(&mut self, data: &mut Self::Data, _res: &Self::Resources) {
                 let (pos, vel) = data;
                 println!("Pos: {:?}", pos);
                 println!("Vel: {:?}", vel);

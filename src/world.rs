@@ -1,4 +1,4 @@
-use crate::{Component, Eid, Entity, EntityBuilder, System, SystemData};
+use crate::{Component, Eid, Entity, EntityBuilder, System, SystemData, ResourceData};
 use std::any::{Any, TypeId};
 use std::collections::{HashMap, HashSet};
 
@@ -175,12 +175,14 @@ impl World {
     ///
     /// ```
     pub fn dispatch_system<S: System>(&mut self, sys: &mut S) {
-        for entity in self.entities.values_mut() {
-            if let Some(data) = S::Data::fetch(entity) {
-                let mut new_data = data.clone();
-                sys.run(&mut new_data);
-                println!("Manipulated Data: {:?}", new_data);
-                entity.set::<S>(new_data);
+        if let Some(res) = S::Resources::fetch_res(self) {
+            for entity in self.entities.values_mut() {
+                if let Some(data) = S::Data::fetch(entity) {
+                    let mut new_data = data.clone();
+                    sys.run(&mut new_data, &res);
+                    println!("Manipulated Data: {:?}", new_data);
+                    entity.set::<S>(new_data);
+                }
             }
         }
     }
@@ -321,5 +323,34 @@ mod test_world {
         assert!(dead_e.is_none());
         let alive_e = world.entities.get(&e2);
         assert!(alive_e.is_some());
+    }
+    #[test]
+    fn test_world_resource(){
+
+        use std::time::Instant;
+        use crate::{System, Component};
+        let mut world = World::default();
+        world.add_resource(Instant::now());
+        
+        #[derive(Debug, Clone, Component)]
+        struct TimedFlag;
+
+        struct TimeSys;
+        impl System for TimeSys {
+            type Data = TimedFlag;
+            type Resources = Instant;
+            fn run(&mut self, _data: &mut Self::Data, res: &Self::Resources){
+                println!("Instant: {:?}", res);
+            }
+        }
+
+        let mut sys = TimeSys;
+        world
+            .create_entity()
+            .with(TimedFlag)
+            .build();
+
+        world.dispatch_system(&mut sys);
+
     }
 }
