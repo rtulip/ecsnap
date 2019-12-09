@@ -60,7 +60,7 @@ impl<A: 'static + Clone + Debug> ResourceData for A {
     fn fetch_res(w: &World) -> Option<Self> {
         match w.get_resource::<A>() {
             Some(a) => Some((*a).clone()),
-            _ => None
+            _ => None,
         }
     }
 }

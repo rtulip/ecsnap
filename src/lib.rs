@@ -88,4 +88,4 @@ mod world;
 pub use world::World;
 
 mod system;
-pub use system::{System, SystemData, ResourceData};
+pub use system::{ResourceData, System, SystemData};

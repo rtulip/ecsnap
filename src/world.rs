@@ -1,4 +1,4 @@
-use crate::{Component, Eid, Entity, EntityBuilder, System, SystemData, ResourceData};
+use crate::{Component, Eid, Entity, EntityBuilder, ResourceData, System, SystemData};
 use std::any::{Any, TypeId};
 use std::collections::{HashMap, HashSet};
 
@@ -8,7 +8,7 @@ pub struct World {
     component_ids: HashSet<TypeId>,
     entities: HashMap<Eid, Entity>,
     next_entity_id: Eid,
-    resources: HashMap<TypeId, Box<dyn Any>>, 
+    resources: HashMap<TypeId, Box<dyn Any>>,
 }
 
 impl World {
@@ -33,19 +33,19 @@ impl World {
     }
 
     /// Adds a resource to the World.
-    /// 
+    ///
     /// # Example
     /// ```
     /// extern crate ecsnap;
     /// use ecsnap::World;
     /// use std::time::Instant;
-    /// 
+    ///
     /// let mut world = World::default();
     /// world.add_resource(Instant::now());
     /// ```
-    pub fn add_resource<R: 'static>(&mut self, resource: R) -> Option<R>{
-        if let Some(r_opt) = self.resources.insert(TypeId::of::<R>(), Box::new(resource)){
-            if let Ok(r) = r_opt.downcast::<R>(){
+    pub fn add_resource<R: 'static>(&mut self, resource: R) -> Option<R> {
+        if let Some(r_opt) = self.resources.insert(TypeId::of::<R>(), Box::new(resource)) {
+            if let Ok(r) = r_opt.downcast::<R>() {
                 Some(*r)
             } else {
                 None
@@ -53,7 +53,6 @@ impl World {
         } else {
             None
         }
-
     }
 
     /// Returns a reference to a `Resource` R if it is in the `World`.
@@ -325,13 +324,12 @@ mod test_world {
         assert!(alive_e.is_some());
     }
     #[test]
-    fn test_world_resource(){
-
+    fn test_world_resource() {
+        use crate::{Component, System};
         use std::time::Instant;
-        use crate::{System, Component};
         let mut world = World::default();
         world.add_resource(Instant::now());
-        
+
         #[derive(Debug, Clone, Component)]
         struct TimedFlag;
 
@@ -339,18 +337,14 @@ mod test_world {
         impl System for TimeSys {
             type Data = TimedFlag;
             type Resources = Instant;
-            fn run(&mut self, _data: &mut Self::Data, res: &Self::Resources){
+            fn run(&mut self, _data: &mut Self::Data, res: &Self::Resources) {
                 println!("Instant: {:?}", res);
             }
         }
 
         let mut sys = TimeSys;
-        world
-            .create_entity()
-            .with(TimedFlag)
-            .build();
+        world.create_entity().with(TimedFlag).build();
 
         world.dispatch_system(&mut sys);
-
     }
 }
