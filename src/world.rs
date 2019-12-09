@@ -32,6 +32,19 @@ impl World {
         self.component_ids.insert(TypeId::of::<C>())
     }
 
+    pub fn add_resource<R: 'static>(&mut self, resource: R) -> Option<R>{
+        if let Some(r_opt) = self.resources.insert(TypeId::of::<R>(), Box::new(resource)){
+            if let Ok(r) = r_opt.downcast::<R>(){
+                Some(*r)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+
+    }
+
     /// Creates an `EntityBuilder` to start creating an `Entity`. Calling .build() on the
     /// `EntityBuilder` will add the constructed `Entity` to the `World`.
     ///
