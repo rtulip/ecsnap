@@ -1,3 +1,6 @@
 /target
 **/*.rs.bk
 Cargo.lock
+/ecsnap-derive/target
+/ecsnap-derive/**/*.rs.bk
+/ecsnap-derivegit/Cargo.lock
