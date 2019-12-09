@@ -77,6 +77,9 @@
 //! world.dispatch_system(&mut mvt);
 //! world.dispatch_system(&mut mvt);
 //! ```
+extern crate ecsnap_derive;
+pub use ecsnap_derive::Component;
+
 mod component;
 pub use component::Component;
 
