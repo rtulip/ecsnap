@@ -1,5 +1,5 @@
 use crate::{Component, Eid, Entity, EntityBuilder, System, SystemData};
-use std::any::TypeId;
+use std::any::{Any, TypeId};
 use std::collections::{HashMap, HashSet};
 
 /// A container for all the `Entities`.
@@ -8,6 +8,7 @@ pub struct World {
     component_ids: HashSet<TypeId>,
     entities: HashMap<Eid, Entity>,
     next_entity_id: Eid,
+    resources: HashMap<TypeId, Box<dyn Any>>, 
 }
 
 impl World {
