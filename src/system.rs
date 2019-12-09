@@ -1,4 +1,4 @@
-use crate::{Component, Entity};
+use crate::{Component, Entity, World};
 use std::fmt::Debug;
 
 /// Trait used to define what kind of data can be used to Query in a `System`.
@@ -50,12 +50,30 @@ where
     }
 }
 
+pub trait ResourceData: Sized + Debug + Clone {
+    fn fetch(w: &World) -> Option<Self>;
+    fn set(self, w: &mut World);
+}
+
+impl<A: 'static + Clone + Debug> ResourceData for A {
+    fn fetch(w: &World) -> Option<Self> {
+        match w.get_resource::<A>() {
+            Some(a) => Some((*a).clone()),
+            _ => None
+        }
+    }
+    fn set(self, w: &mut World) {
+        w.add_resource::<A>(self);
+    }
+}
+
 /// Trait defining a generic System. Any `Entity` with that doens't return `None` to
 /// `System::Data::fetch` will have `run` called on its Data.
 pub trait System {
     /// Defines the type of data to be queried.
     type Data: SystemData;
-    type Resources: 'static;
+    /// Defines which `Resources` should be queried.
+    type Resources: ResourceData;
     /// Defines the behaviour of the system. Gets called in World::system_dispatch.
     fn run(&mut self, data: &mut Self::Data);
 }

@@ -56,6 +56,15 @@ impl World {
 
     }
 
+    /// Returns a reference to a `Resource` R if it is in the `World`.
+    pub fn get_resource<R: 'static>(&self) -> Option<&R> {
+        if let Some(bx) = self.resources.get(&TypeId::of::<R>()) {
+            bx.downcast_ref::<R>()
+        } else {
+            None
+        }
+    }
+
     /// Creates an `EntityBuilder` to start creating an `Entity`. Calling .build() on the
     /// `EntityBuilder` will add the constructed `Entity` to the `World`.
     ///
