@@ -19,22 +19,19 @@
 //! use ecsnap::{Component, System, World};
 //!
 //! // Components are structs which hold data for an Entity. Components must derive
-//! // Debug, Clone, & Copy.
-//! #[derive(Debug, Clone, Copy)]
+//! // Debug, Clone.
+//! #[derive(Debug, Clone, Component)]
 //! struct Pos {
 //!     x: f64,
 //!     y: f64,
 //! }
 //!
-//! #[derive(Debug, Clone, Copy)]
+//! #[derive(Debug, Clone, Component)]
 //! struct Vel {
 //!     x: f64,
 //!     y: f64,
 //! }
 //!
-//! // Todo: make Component Derivable.
-//! impl Component for Pos {}
-//! impl Component for Vel {}
 //!
 //! // Systems are structs which can have internal data & operate on Components
 //! struct MovementSystem {
@@ -77,6 +74,9 @@
 //! world.dispatch_system(&mut mvt);
 //! world.dispatch_system(&mut mvt);
 //! ```
+extern crate ecsnap_derive;
+pub use ecsnap_derive::Component;
+
 mod component;
 pub use component::Component;
 

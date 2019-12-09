@@ -18,13 +18,11 @@ impl World {
     /// extern crate ecsnap;
     /// use ecsnap::{World, Component};
     ///
-    /// #[derive(Debug, Clone, Copy)]
+    /// #[derive(Debug, Clone, Component)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
-    ///
-    /// impl Component for Pos {}
     ///
     /// let mut world = World::default();
     /// world.register_component::<Pos>();
@@ -41,12 +39,11 @@ impl World {
     /// extern crate ecsnap;
     /// use ecsnap::{Component, World};
     ///
-    /// #[derive(Debug, Clone, Copy)]
+    /// #[derive(Debug, Clone, Component)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
-    /// impl Component for Pos {}
     ///
     /// let mut world = World::default();
     /// world.create_entity()
@@ -97,20 +94,17 @@ impl World {
     /// extern crate ecsnap;
     /// use ecsnap::{Component, System, World};
     ///
-    /// #[derive(Debug, Clone, Copy)]
+    /// #[derive(Debug, Clone, Component)]
     /// struct Pos {
     ///     x: f64,
     ///     y: f64,
     /// }
     ///
-    /// #[derive(Debug, Clone, Copy)]
+    /// #[derive(Debug, Clone, Component)]
     /// struct Vel {
     ///     x: f64,
     ///     y: f64,
     /// }
-    ///
-    /// impl Component for Pos {}
-    /// impl Component for Vel {}
     ///
     /// struct MovementSystem {
     ///     dt: f64,         
@@ -163,13 +157,11 @@ mod test_world {
     use crate::{Component, World};
     #[test]
     fn test_register_component() {
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Component)]
         struct Pos {
             _x: f64,
             _y: f64,
         }
-
-        impl Component for Pos {}
 
         let mut world: World = Default::default();
         let val = world.register_component::<Pos>();
@@ -179,20 +171,17 @@ mod test_world {
 
     #[test]
     fn test_add_component_to_entity() {
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Component)]
         struct Pos {
             x: f64,
             y: f64,
         }
 
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Component)]
         struct Vel {
             x: f64,
             y: f64,
         }
-
-        impl Component for Pos {}
-        impl Component for Vel {}
 
         let mut world: World = Default::default();
         world.register_component::<Pos>();
@@ -224,20 +213,17 @@ mod test_world {
 
     #[test]
     fn test_remove_component_from_entity() {
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Component)]
         struct Pos {
             x: f64,
             y: f64,
         }
 
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Component)]
         struct Vel {
             x: f64,
             y: f64,
         }
-
-        impl Component for Pos {}
-        impl Component for Vel {}
 
         let mut world: World = Default::default();
         world.register_component::<Pos>();
@@ -271,20 +257,17 @@ mod test_world {
 
     #[test]
     fn test_destroy_entity() {
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Component)]
         struct Pos {
             x: f64,
             y: f64,
         }
 
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Component)]
         struct Vel {
             x: f64,
             y: f64,
         }
-
-        impl Component for Pos {}
-        impl Component for Vel {}
 
         let mut world: World = Default::default();
         world.register_component::<Pos>();
