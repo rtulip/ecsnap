@@ -32,6 +32,17 @@ impl World {
         self.component_ids.insert(TypeId::of::<C>())
     }
 
+    /// Adds a resource to the World.
+    /// 
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::World;
+    /// use std::time::Instant;
+    /// 
+    /// let mut world = World::default();
+    /// world.add_resource(Instant::now());
+    /// ```
     pub fn add_resource<R: 'static>(&mut self, resource: R) -> Option<R>{
         if let Some(r_opt) = self.resources.insert(TypeId::of::<R>(), Box::new(resource)){
             if let Ok(r) = r_opt.downcast::<R>(){
