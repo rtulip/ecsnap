@@ -3,4 +3,4 @@
 Cargo.lock
 /ecsnap-derive/target
 /ecsnap-derive/**/*.rs.bk
-/ecsnap-derivegit/Cargo.lock
+/ecsnap-derive/Cargo.lock
