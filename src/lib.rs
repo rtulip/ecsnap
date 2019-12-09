@@ -76,7 +76,7 @@
 //! world.dispatch_system(&mut mvt);
 //! ```
 extern crate ecsnap_derive;
-pub use ecsnap_derive::Component;
+pub use ecsnap_derive::{Component, Resource};
 
 mod component;
 pub use component::Component;
@@ -89,3 +89,6 @@ pub use world::World;
 
 mod system;
 pub use system::{ResourceData, System, SystemData};
+
+mod resource;
+pub use resource::Resource;

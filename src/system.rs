@@ -1,4 +1,4 @@
-use crate::{Component, Entity, World};
+use crate::{Component, Entity, World, Resource};
 use std::fmt::Debug;
 
 /// Trait used to define what kind of data can be used to Query in a `System`.
@@ -15,6 +15,13 @@ pub trait SystemData: Sized + Clone + Debug {
     fn fetch(e: &Entity) -> Option<Self>;
     /// Defines the behaviour for updateing an `Entities` data to some new `SystemData`.
     fn set(self, e: &mut Entity);
+}
+
+impl SystemData for () { 
+    fn fetch(_e: &Entity) -> Option<Self> {
+        None
+    }
+    fn set(self, _e: &mut Entity){}
 }
 
 impl<C> SystemData for C
@@ -54,14 +61,23 @@ where
 pub trait ResourceData: Sized + Debug + Clone {
     /// Fetches the `Resources for the `World`.
     fn fetch_res(w: &World) -> Option<Self>;
+    fn set_res(self, w: &mut World);
 }
 
-impl<A: 'static + Clone + Debug> ResourceData for A {
+impl ResourceData for () {
+    fn fetch_res(_w: &World) -> Option<Self> { None }
+    fn set_res(self, _w: &mut World) {}
+}
+
+impl<R: Resource> ResourceData for R {
     fn fetch_res(w: &World) -> Option<Self> {
-        match w.get_resource::<A>() {
+        match w.get_resource::<R>() {
             Some(a) => Some((*a).clone()),
             _ => None,
         }
+    }
+    fn set_res(self, w: &mut World) {
+        w.add_resource::<R>(self);
     }
 }
 
@@ -73,7 +89,9 @@ pub trait System {
     /// Defines which `Resources` should be queried.
     type Resources: ResourceData;
     /// Defines the behaviour of the system. Gets called in World::system_dispatch.
-    fn run(&mut self, data: &mut Self::Data, res: &Self::Resources);
+    fn run(&mut self, _data: &mut Self::Data, _res: &Self::Resources) {}
+    /// Deifnes the behaviour for updating the system. Gets called in World::dispatch_resource_update.
+    fn update_resource(&self, _res: &mut Self::Resources) {}
 }
 
 #[cfg(test)]

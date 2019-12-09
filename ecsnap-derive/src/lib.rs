@@ -17,3 +17,17 @@ fn impl_component(ast: &syn::DeriveInput) -> TokenStream {
     };
     gen.into()
 }
+
+#[proc_macro_derive(Resource)]
+pub fn resource_derive(input: TokenStream) -> TokenStream {
+    let ast = syn::parse(input).unwrap();
+    impl_resource(&ast)
+}
+
+fn impl_resource(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl Resource for #name {}
+    };
+    gen.into()
+}

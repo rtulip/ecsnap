@@ -1,4 +1,4 @@
-use crate::{Component, Eid, Entity, EntityBuilder, ResourceData, System, SystemData};
+use crate::{Component, Eid, Entity, EntityBuilder, Resource, ResourceData, System, SystemData};
 use std::any::{Any, TypeId};
 use std::collections::{HashMap, HashSet};
 
@@ -37,13 +37,18 @@ impl World {
     /// # Example
     /// ```
     /// extern crate ecsnap;
-    /// use ecsnap::World;
+    /// use ecsnap::{World, Resource};
     /// use std::time::Instant;
     ///
+    /// #[derive(Debug, Clone, Resource)]
+    /// struct DeltaTime {
+    ///     now: Instant
+    /// }
+    /// 
     /// let mut world = World::default();
-    /// world.add_resource(Instant::now());
+    /// world.add_resource(DeltaTime{ now: Instant::now() });
     /// ```
-    pub fn add_resource<R: 'static>(&mut self, resource: R) -> Option<R> {
+    pub fn add_resource<R: Resource>(&mut self, resource: R) -> Option<R> {
         if let Some(r_opt) = self.resources.insert(TypeId::of::<R>(), Box::new(resource)) {
             if let Ok(r) = r_opt.downcast::<R>() {
                 Some(*r)
@@ -56,7 +61,7 @@ impl World {
     }
 
     /// Returns a reference to a `Resource` R if it is in the `World`.
-    pub fn get_resource<R: 'static>(&self) -> Option<&R> {
+    pub fn get_resource<R: Resource>(&self) -> Option<&R> {
         if let Some(bx) = self.resources.get(&TypeId::of::<R>()) {
             bx.downcast_ref::<R>()
         } else {
@@ -183,6 +188,14 @@ impl World {
                     entity.set::<S>(new_data);
                 }
             }
+        }
+    }
+
+    pub fn dispatch_resource_update<S: System>(&mut self, sys: &mut S){
+        if let Some(res) = S::Resources::fetch_res(self){
+            let mut new_res = res.clone();
+            sys.update_resource(&mut new_res);
+            S::Resources::set_res(new_res, self)
         }
     }
 }
@@ -325,26 +338,32 @@ mod test_world {
     }
     #[test]
     fn test_world_resource() {
-        use crate::{Component, System};
-        use std::time::Instant;
+        use crate::{System, Resource};
+        use std::time::{Instant, Duration};
+        use std::thread::sleep;
+        
+        #[derive(Debug, Clone, Resource)]
+        struct DeltaTime {
+            now: Instant,
+        }
+
         let mut world = World::default();
-        world.add_resource(Instant::now());
-
-        #[derive(Debug, Clone, Component)]
-        struct TimedFlag;
-
+        world.add_resource(DeltaTime{ now : Instant::now() });
         struct TimeSys;
         impl System for TimeSys {
-            type Data = TimedFlag;
-            type Resources = Instant;
-            fn run(&mut self, _data: &mut Self::Data, res: &Self::Resources) {
-                println!("Instant: {:?}", res);
+            type Data = ();
+            type Resources = DeltaTime;
+            fn run(&mut self, _data: &mut Self::Data, _res: &Self::Resources) {}
+            fn update_resource(&self, res: &mut Self::Resources){
+                let mut dt = res;
+                println!("Time Old: {:?}", dt.now.elapsed());
+                dt.now = Instant::now();
             }
         }
 
         let mut sys = TimeSys;
-        world.create_entity().with(TimedFlag).build();
-
-        world.dispatch_system(&mut sys);
+        world.dispatch_resource_update(&mut sys);
+        sleep(Duration::from_secs(2));
+        world.dispatch_resource_update(&mut sys);
     }
 }
