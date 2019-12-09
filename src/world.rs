@@ -147,7 +147,7 @@ impl World {
     /// impl System for MovementSystem {
     ///     type Data = (Pos, Vel);
     ///     type Resources = ();
-    ///     fn run(&mut self, data: &mut Self::Data){
+    ///     fn run(&mut self, data: &mut Self::Data, res: &Self::Resources){
     ///         let (pos, vel) = data;
     ///         pos.x += vel.x * self.dt;
     ///         pos.y += vel.y * self.dt;
