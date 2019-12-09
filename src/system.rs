@@ -66,19 +66,17 @@ mod test_system {
 
     #[test]
     fn ideal() {
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Component)]
         struct Pos {
             x: f64,
             y: f64,
         }
 
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Component)]
         struct Vel {
             x: f64,
             y: f64,
         }
-        impl Component for Pos {}
-        impl Component for Vel {}
 
         let mut world = World::default();
         world
