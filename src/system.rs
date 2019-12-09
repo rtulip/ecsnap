@@ -55,6 +55,7 @@ where
 pub trait System {
     /// Defines the type of data to be queried.
     type Data: SystemData;
+    type Resources: 'static;
     /// Defines the behaviour of the system. Gets called in World::system_dispatch.
     fn run(&mut self, data: &mut Self::Data);
 }
@@ -89,7 +90,7 @@ mod test_system {
 
         impl System for ReadSys {
             type Data = (Pos, Vel);
-
+            type Resources = ();
             fn run(&mut self, data: &mut Self::Data) {
                 let (pos, vel) = data;
                 println!("Pos: {:?}", pos);

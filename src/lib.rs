@@ -42,6 +42,7 @@
 //! impl System for MovementSystem {
 //!     // Define the components required for this system.    
 //!     type Data = (Pos, Vel);
+//!     type Resources = ();
 //!     // Define the operation on the Component data. All data fetched is mutable.
 //!     fn run(&mut self, data: &mut Self::Data){
 //!         let (pos, vel) = data;
