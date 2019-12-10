@@ -184,7 +184,6 @@ impl World {
                 if let Some(data) = S::Data::fetch(entity) {
                     let mut new_data = data.clone();
                     sys.run(&mut new_data, &res);
-                    println!("Manipulated Data: {:?}", new_data);
                     entity.set::<S>(new_data);
                 }
             }
