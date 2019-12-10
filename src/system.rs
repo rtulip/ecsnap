@@ -1,4 +1,4 @@
-use crate::{Component, Entity, World, Resource};
+use crate::{Component, Entity, Resource, World};
 use std::fmt::Debug;
 
 /// Trait used to define what kind of data can be used to Query in a `System`.
@@ -17,11 +17,11 @@ pub trait SystemData: Sized + Clone + Debug {
     fn set(self, e: &mut Entity);
 }
 
-impl SystemData for () { 
+impl SystemData for () {
     fn fetch(_e: &Entity) -> Option<Self> {
         None
     }
-    fn set(self, _e: &mut Entity){}
+    fn set(self, _e: &mut Entity) {}
 }
 
 impl<C> SystemData for C
@@ -65,7 +65,9 @@ pub trait ResourceData: Sized + Debug + Clone {
 }
 
 impl ResourceData for () {
-    fn fetch_res(_w: &World) -> Option<Self> { None }
+    fn fetch_res(_w: &World) -> Option<Self> {
+        None
+    }
     fn set_res(self, _w: &mut World) {}
 }
 

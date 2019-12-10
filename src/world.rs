@@ -44,7 +44,7 @@ impl World {
     /// struct DeltaTime {
     ///     now: Instant
     /// }
-    /// 
+    ///
     /// let mut world = World::default();
     /// world.add_resource(DeltaTime{ now: Instant::now() });
     /// ```
@@ -191,8 +191,42 @@ impl World {
         }
     }
 
-    pub fn dispatch_resource_update<S: System>(&mut self, sys: &mut S){
-        if let Some(res) = S::Resources::fetch_res(self){
+    /// Runs a `System::update_resource` for a given System.
+    ///
+    /// # Example
+    /// ```
+    /// extern crate ecsnap;
+    /// use ecsnap::{World, System, Resource};
+    /// use std::time::{Instant, Duration};
+    /// use std::thread::sleep;
+    ///
+    /// #[derive(Debug, Clone, Resource)]
+    /// struct DeltaTime {
+    ///     now: Instant,
+    /// }
+    ///
+    /// let mut world = World::default();
+    /// world.add_resource(DeltaTime{ now : Instant::now() });
+    /// struct TimeSys;
+    /// impl System for TimeSys {
+    ///     type Data = ();
+    ///     type Resources = DeltaTime;
+    ///     fn run(&mut self, _data: &mut Self::Data, _res: &Self::Resources) {}
+    ///     fn update_resource(&self, res: &mut Self::Resources){
+    ///         let mut dt = res;
+    ///         println!("Time Old: {:?}", dt.now.elapsed());
+    ///         dt.now = Instant::now();
+    ///     }
+    /// }
+    ///
+    /// let mut sys = TimeSys;
+    /// world.dispatch_resource_update(&mut sys);
+    /// sleep(Duration::from_secs(2));
+    /// world.dispatch_resource_update(&mut sys);
+    ///
+    /// ```
+    pub fn dispatch_resource_update<S: System>(&mut self, sys: &mut S) {
+        if let Some(res) = S::Resources::fetch_res(self) {
             let mut new_res = res.clone();
             sys.update_resource(&mut new_res);
             S::Resources::set_res(new_res, self)
@@ -338,23 +372,25 @@ mod test_world {
     }
     #[test]
     fn test_world_resource() {
-        use crate::{System, Resource};
-        use std::time::{Instant, Duration};
+        use crate::{Resource, System};
         use std::thread::sleep;
-        
+        use std::time::{Duration, Instant};
+
         #[derive(Debug, Clone, Resource)]
         struct DeltaTime {
             now: Instant,
         }
 
         let mut world = World::default();
-        world.add_resource(DeltaTime{ now : Instant::now() });
+        world.add_resource(DeltaTime {
+            now: Instant::now(),
+        });
         struct TimeSys;
         impl System for TimeSys {
             type Data = ();
             type Resources = DeltaTime;
             fn run(&mut self, _data: &mut Self::Data, _res: &Self::Resources) {}
-            fn update_resource(&self, res: &mut Self::Resources){
+            fn update_resource(&self, res: &mut Self::Resources) {
                 let mut dt = res;
                 println!("Time Old: {:?}", dt.now.elapsed());
                 dt.now = Instant::now();
