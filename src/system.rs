@@ -61,6 +61,7 @@ where
 pub trait ResourceData: Sized + Debug + Clone {
     /// Fetches the `Resources for the `World`.
     fn fetch_res(w: &World) -> Option<Self>;
+    /// Sets the Resourcedata to the World.
     fn set_res(self, w: &mut World);
 }
 
