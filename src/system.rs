@@ -58,7 +58,7 @@ where
 }
 
 /// Trait defining how to access world `Resources`.
-pub trait ResourceData: Sized + Debug + Clone {
+pub trait ResourceData: Sized + Clone {
     /// Fetches the `Resources for the `World`.
     fn fetch_res(w: &World) -> Option<Self>;
     /// Sets the Resourcedata to the World.
